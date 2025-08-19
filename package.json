@@ -1,0 +1,27 @@
+{
+  "name": "prompt-gallery-backend",
+  "version": "1.0.0",
+  "main": "src/app.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --exec npx tsx  src/app.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "pg-protocol": "^1.10.3",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/pg": "^8.15.5",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.4"
+  },
+  "description": ""
+}
