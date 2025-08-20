@@ -3,12 +3,13 @@ import { pool } from "../config/database";
 const createUserTableQuery = async () => {
   try {
     const userTableQuery = `
-      CREATE TABLE  IF NOT EXISTS "User" (
+      CREATE TABLE  IF NOT EXISTS "users" (
         id SERIAL PRIMARY KEY,          -- Internal use (joins, FKs)
         user_uuid UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(), -- External use (APIs, URLs)        
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
+        user_status BOOLEAN DEFAULT TRUE,
         createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updatedAt  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
@@ -23,7 +24,7 @@ const createUserTableQuery = async () => {
 const createLLMModelTableQuery = async () => {
   try {
     const LLMModelTableQuery = `
-      CREATE TABLE  IF NOT EXISTS LLM_Model (
+      CREATE TABLE  IF NOT EXISTS LLM_Models (
         model_id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         description TEXT,
@@ -43,9 +44,9 @@ const createLLMModelTableQuery = async () => {
 const createPromptTableQuery = async () => {
   try {
     const PromptTableQuery = `
-      CREATE TABLE  IF NOT EXISTS Prompt (
+      CREATE TABLE  IF NOT EXISTS prompts (
         prompt_id SERIAL PRIMARY KEY,
-        user_id INT REFERENCES "User"(id),
+        user_id INT REFERENCES "users"(id),
         title VARCHAR(200),
         description TEXT,
         content TEXT NOT NULL,
@@ -63,10 +64,10 @@ const createPromptTableQuery = async () => {
 const createResponseTableQuery = async () => {
   try {
     const ResponseTableQuery = `
-      CREATE TABLE  IF NOT EXISTS Response (
+      CREATE TABLE  IF NOT EXISTS responses (
         response_id SERIAL PRIMARY KEY,
-        prompt_id INT REFERENCES Prompt(prompt_id),
-        model_id INT REFERENCES LLM_Model(model_id),
+        prompt_id INT REFERENCES prompts(prompt_id),
+        model_id INT REFERENCES LLM_Models(model_id),
         content TEXT NOT NULL,
         created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
@@ -81,11 +82,11 @@ const createResponseTableQuery = async () => {
 const createRatingTableQuery = async () => {
   try {
     const RatingTableQuery = `
-      CREATE TABLE  IF NOT EXISTS Rating (
+      CREATE TABLE  IF NOT EXISTS ratings (
         rating_id SERIAL PRIMARY KEY,
-        user_id INT REFERENCES "User"(id),
-        prompt_id INT REFERENCES Prompt(prompt_id),
-        response_id INT REFERENCES Response(response_id),
+        user_id INT REFERENCES "users"(id),
+        prompt_id INT REFERENCES prompts(prompt_id),
+        response_id INT REFERENCES responses(response_id),
         score INT CHECK (score BETWEEN 1 AND 5),
         created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(user_id, prompt_id, response_id) -- Idempotency key
@@ -101,10 +102,10 @@ const createRatingTableQuery = async () => {
 const createShareTableQuery = async () => {
   try {
     const ShareTableQuery = `
-      CREATE TABLE  IF NOT EXISTS Share  (
+      CREATE TABLE  IF NOT EXISTS shares  (
         share_id SERIAL PRIMARY KEY,
-        prompt_id INT REFERENCES Prompt(prompt_id),
-        user_id INT REFERENCES "User"(id),
+        prompt_id INT REFERENCES prompts(prompt_id),
+        user_id INT REFERENCES "users"(id),
         link VARCHAR(500) UNIQUE,
         email VARCHAR(100),
         email_sent BOOLEAN DEFAULT FALSE,
@@ -121,11 +122,11 @@ const createShareTableQuery = async () => {
 const createCommentTableQuery = async () => {
   try {
     const CommentTableQuery = `
-      CREATE TABLE  IF NOT EXISTS Comment  (
+      CREATE TABLE  IF NOT EXISTS comments  (
         comment_id SERIAL PRIMARY KEY,
-        user_id INT REFERENCES "User"(id),
-        prompt_id INT REFERENCES Prompt(prompt_id),
-        response_id INT REFERENCES Response(response_id),
+        user_id INT REFERENCES "users"(id),
+        prompt_id INT REFERENCES prompts(prompt_id),
+        response_id INT REFERENCES responses(response_id),
         content TEXT NOT NULL,
         created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(user_id, prompt_id, response_id, content) -- Idempotency key
@@ -141,14 +142,14 @@ const createCommentTableQuery = async () => {
 const createIndexQuery = async () => {
   try {
     const IndexQuery = `      
-      CREATE INDEX idx_prompt_user_id ON Prompt(user_id);
-      CREATE INDEX idx_response_prompt_id ON Response(prompt_id);
-      CREATE INDEX idx_response_model_id ON Response(model_id);
-      CREATE INDEX idx_rating_prompt_id ON Rating(prompt_id);
-      CREATE INDEX idx_rating_response_id ON Rating(response_id);
-      CREATE INDEX idx_comment_prompt_id ON Comment(prompt_id);
-      CREATE INDEX idx_comment_response_id ON Comment(response_id);
-      CREATE INDEX idx_share_prompt_id ON Share(prompt_id);
+      CREATE INDEX IF NOT EXISTS idx_prompt_user_id ON prompts(user_id);
+      CREATE INDEX IF NOT EXISTS idx_response_prompt_id ON responses(prompt_id);
+      CREATE INDEX IF NOT EXISTS idx_response_model_id ON responses(model_id);
+      CREATE INDEX IF NOT EXISTS idx_rating_prompt_id ON ratings(prompt_id);
+      CREATE INDEX IF NOT EXISTS idx_rating_response_id ON ratings(response_id);
+      CREATE INDEX IF NOT EXISTS idx_comment_prompt_id ON comments(prompt_id);
+      CREATE INDEX IF NOT EXISTS idx_comment_response_id ON comments(response_id);
+      CREATE INDEX IF NOT EXISTS idx_share_prompt_id ON shares(prompt_id);
     `;
     await pool.query(IndexQuery);
     console.log("Table IndexQuery created successfully");
