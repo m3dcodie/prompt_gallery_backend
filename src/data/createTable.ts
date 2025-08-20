@@ -29,7 +29,8 @@ const createLLMModelTableQuery = async () => {
         description TEXT,
         provider VARCHAR(50),
         version VARCHAR(20),
-        created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(name, provider, version)  -- Optional: Idempotency key
       );
     `;
     await pool.query(LLMModelTableQuery);
@@ -48,7 +49,8 @@ const createPromptTableQuery = async () => {
         title VARCHAR(200),
         description TEXT,
         content TEXT NOT NULL,
-        created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, content)  -- Optional: Idempotency key
       );
     `;
     await pool.query(PromptTableQuery);
@@ -86,7 +88,7 @@ const createRatingTableQuery = async () => {
         response_id INT REFERENCES Response(response_id),
         score INT CHECK (score BETWEEN 1 AND 5),
         created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, prompt_id, response_id)
+        UNIQUE(user_id, prompt_id, response_id) -- Idempotency key
       );
     `;
     await pool.query(RatingTableQuery);
@@ -104,6 +106,7 @@ const createShareTableQuery = async () => {
         prompt_id INT REFERENCES Prompt(prompt_id),
         user_id INT REFERENCES "User"(id),
         link VARCHAR(500) UNIQUE,
+        email VARCHAR(100),
         email_sent BOOLEAN DEFAULT FALSE,
         created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
@@ -124,7 +127,8 @@ const createCommentTableQuery = async () => {
         prompt_id INT REFERENCES Prompt(prompt_id),
         response_id INT REFERENCES Response(response_id),
         content TEXT NOT NULL,
-        created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, prompt_id, response_id, content) -- Idempotency key
       );
     `;
     await pool.query(CommentTableQuery);
