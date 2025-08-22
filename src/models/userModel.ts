@@ -1,4 +1,5 @@
 import {pool} from "../config/database";
+import {UserCreateRequest} from "../types/user";
 
 export const getAllUsersService = async () => {
     const result = await pool.query("SELECT first_name,last_name, email, createdAt, updatedAt, user_status FROM users");
@@ -8,8 +9,8 @@ export const getUserByIdService = async (id) => {
     const result = await pool.query("SELECT first_name,last_name, email, createdAt, updatedAt, user_status FROM users where id = $1",[id]);
     return result.rows[0];
 };
-export const createUserService = async (first_name,last_name, email) => {
-    const result = await pool.query("INSERT INTO users (first_name,last_name, email) VALUES ($1, $2, $3) RETURNING *", [first_name,last_name , email]);
+export const createUserService = async (userCreateRequest: UserCreateRequest) => {
+    const result = await pool.query("INSERT INTO users (first_name,last_name, email) VALUES ($1, $2, $3) RETURNING *", [userCreateRequest.first_name,userCreateRequest.last_name , userCreateRequest.email]);
     return result.rows[0];
 };
 export const updateUsersService = async (id,first_name,last_name) => {

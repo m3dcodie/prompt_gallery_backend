@@ -1,5 +1,6 @@
 // Standarized response function
 import { createUserService, getAllUsersService, getUserByIdService, updateUsersService, deleteUsersService } from "../models/userModel.js";
+import {UserCreateRequest} from "../types/user";
 
 const handleResponse = (res: any, statusCode: number, message: string, data?: any) => {
   res.status(statusCode).json({
@@ -11,9 +12,14 @@ const handleResponse = (res: any, statusCode: number, message: string, data?: an
 
 export const createUser = async (req, res, next) => {
     const { first_name,last_name, email } = req.body;
+    const userCreateRequest: UserCreateRequest = {
+        first_name,
+        last_name,
+        email
+    }
     try {
-        const newUser = await createUserService(first_name,last_name, email);
-        handleResponse(res, 201, "User created successfully", newUser.rows[0]);
+        const newUser = await createUserService(userCreateRequest);
+        handleResponse(res, 201, "User created successfully", newUser);
     }catch(err) {
         next(err)
     }
@@ -22,6 +28,7 @@ export const createUser = async (req, res, next) => {
 
 export const getAllUsers = async (req, res, next) => {
     try {
+        console.log("Request received")
         const allUsers = await getAllUsersService();
         handleResponse(res, 200, "Getting all users", allUsers);
     }catch(err) {
