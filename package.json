@@ -7,7 +7,8 @@
     "dev": "nodemon --exec npx tsx  src/app.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prettier": "prettier"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@tsconfig/node20": "^20.1.6",
+    "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.3.0",
     "@types/pg": "^8.15.5",

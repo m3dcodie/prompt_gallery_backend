@@ -12,3 +12,5 @@ authorizer/*.zip
 
 #test file to debug
 test
+
+.env
