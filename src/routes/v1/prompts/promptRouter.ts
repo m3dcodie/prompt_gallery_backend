@@ -1,7 +1,11 @@
 import express from "express";
-import { getAllPrompts } from "../../../controllers/promptController";
+import {
+  getAllPrompts,
+  createPrompt,
+} from "../../../controllers/promptController";
 
 const promptRouter = express.Router();
 
 promptRouter.get("/", getAllPrompts);
+promptRouter.post("/", createPrompt);
 export default promptRouter;
