@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   getAllPromptsService,
   createPromptService,
-  getPromptByIdService
+  getPromptByIdService,
 } from "../models/promptModel";
 
 import { PromptEntity, PromptRequest } from "../types/prompt";
@@ -46,11 +46,27 @@ export const createPrompt = async (
     content: prompt,
   };
   try {
-    const newPrompt = await createPromptService(promptCreateRequest);
-    const randomResponse: responseType = responses[Math.floor(Math.random() * responses.length)];
-    randomResponse.prompt_id = newPrompt.prompt_id;
-    randomResponse.user_id = newPrompt.user_id;
-    handleResponse(res, 201, "Prompt created successfully", randomResponse);
+    fetch("http://localhost:8000/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: promptCreateRequest.content }),
+    })
+      .then((response) => response.json())
+      .then(async (data) => {
+        console.log(data);
+        const newPrompt = await createPromptService(promptCreateRequest);
+
+        const randomResponse: responseType = {
+          prompt_id: newPrompt.prompt_id,
+          user_id: newPrompt.user_id,
+          response: data,
+        };
+
+        handleResponse(res, 201, "Prompt created successfully", randomResponse);
+      })
+      .catch((error) => console.error("Error:", error));
   } catch (err) {
     next(err);
   }
