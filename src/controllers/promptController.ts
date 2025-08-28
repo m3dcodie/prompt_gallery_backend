@@ -2,9 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import {
   getAllPromptsService,
   createPromptService,
+  getPromptByIdService
 } from "../models/promptModel";
 
 import { PromptEntity, PromptRequest } from "../types/prompt";
+import { responses, responseType } from "../data/sampleResponses";
 
 const handleResponse = (
   res: Response,
@@ -45,7 +47,24 @@ export const createPrompt = async (
   };
   try {
     const newPrompt = await createPromptService(promptCreateRequest);
-    handleResponse(res, 201, "Prompt created successfully", newPrompt);
+    const randomResponse: responseType = responses[Math.floor(Math.random() * responses.length)];
+    randomResponse.prompt_id = newPrompt.prompt_id;
+    randomResponse.user_id = newPrompt.user_id;
+    handleResponse(res, 201, "Prompt created successfully", randomResponse);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getPromptById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const promptId = req.params.id;
+    const prompt: PromptEntity = await getPromptByIdService(promptId);
+    handleResponse(res, 200, "prompt", prompt);
   } catch (err) {
     next(err);
   }

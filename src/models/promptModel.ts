@@ -18,7 +18,18 @@ export const getAllPromptsService = async () => {
 
 export const getPromptByIdService = async (id: number) => {
   const result = await pool.query(
-    "SELECT first_name,last_name, email, createdAt, updatedAt, user_status FROM users where id = $1",
+    `SELECT
+      prompts.prompt_id,
+      user_id,
+      title,
+      prompts.content,
+      response_id,
+      model_id,
+      responses.content as response
+      FROM prompts
+          LEFT OUTER JOIN responses ON prompts.prompt_id = responses.prompt_id
+      where
+      prompts.prompt_id  = $1`,
     [id],
   );
   return result.rows[0];
