@@ -2,6 +2,37 @@ import { pool } from "../config/database";
 import { PromptRequest, PromptEntity } from "../types/prompt";
 
 export const getAllPromptsService = async () => {
+  /*
+  Acquire and Release Clients:
+  const client = await pool.connect();
+        try {
+            const res = await client.query('SELECT * FROM your_table');
+            console.log(res.rows);
+        } finally {
+            client.release(); // Always release the client back to the pool
+        }
+
+        import { Pool } from 'pg'
+const pool = new Pool()
+ 
+const client = await pool.connect()
+ 
+try {
+  await client.query('BEGIN')
+  const queryText = 'INSERT INTO users(name) VALUES($1) RETURNING id'
+  const res = await client.query(queryText, ['brianc'])
+ 
+  const insertPhotoText = 'INSERT INTO photos(user_id, photo_url) VALUES ($1, $2)'
+  const insertPhotoValues = [res.rows[0].id, 's3.bucket.foo']
+  await client.query(insertPhotoText, insertPhotoValues)
+  await client.query('COMMIT')
+} catch (e) {
+  await client.query('ROLLBACK')
+  throw e
+} finally {
+  client.release()
+}
+  */
   const result = await pool.query(
     "SELECT prompt_id, user_id,title,description, content FROM prompts",
   );

@@ -4,9 +4,9 @@ import {
   createPromptService,
   getPromptByIdService,
 } from "../models/promptModel";
-
-import { PromptEntity, PromptRequest } from "../types/prompt";
-import { responses, responseType } from "../data/sampleResponses";
+import { createResponseService } from "../models/responseModel";
+import { PromptEntity, PromptRequest, responseType } from "../types/prompt";
+import { responseLoad } from "../types/response";
 
 const handleResponse = (
   res: Response,
@@ -39,11 +39,15 @@ export const createPrompt = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { title, prompt, user_id } = req.body;
+  const { title, prompt, user_id, model, temperature, top_p, top_k } = req.body;
   const promptCreateRequest: PromptRequest = {
     user_id,
     title,
     content: prompt,
+    model: model,
+    temperature: temperature,
+    top_p: top_p,
+    top_k: top_k,
   };
   try {
     fetch("http://localhost:8000/", {
@@ -51,17 +55,45 @@ export const createPrompt = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ prompt: promptCreateRequest.content }),
+      body: JSON.stringify({
+        prompt: promptCreateRequest.content,
+        model: promptCreateRequest.model,
+        temperature: String(promptCreateRequest.temperature),
+        top_p: String(promptCreateRequest.top_p),
+        top_k: String(promptCreateRequest.top_k),
+      }),
     })
       .then((response) => response.json())
       .then(async (data) => {
+        console.log("data>>>");
         console.log(data);
         const newPrompt = await createPromptService(promptCreateRequest);
+        // Ensure temperature is a decimal with precision 2, scale 2, and < 1
+        let temperature = Math.min(
+          0.99,
+          Math.max(0, Number.parseFloat(1)),//data.output_text.temperature
+        );
+        temperature = Number(temperature.toFixed(2));
+
+        let top_p = Math.min(
+          0.99,
+          Math.max(0, Number.parseFloat(0.5)),//data.output_text.top_p
+        );
+        top_p = Number(top_p.toFixed(2));
+
+        const newResponse = await createResponseService({
+          prompt_id: newPrompt.prompt_id,
+          user_id: promptCreateRequest.user_id,
+          content: data.output_text.content,
+          temperature: temperature,
+          top_p: top_p,
+          usage: "100", //data.usage
+        });
 
         const randomResponse: responseType = {
           prompt_id: newPrompt.prompt_id,
           user_id: newPrompt.user_id,
-          response: data,
+          response: { data: data.output_text.content },
         };
 
         handleResponse(res, 201, "Prompt created successfully", randomResponse);

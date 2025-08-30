@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --exec npx tsx  src/app.ts",
+    "build": "tsc  --build",
+    "clean": "tsc --build --clean",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint",
@@ -24,7 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
-    "@tsconfig/node20": "^20.1.6",
+    "@tsconfig/node22": "^22.0.2",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.3.0",
