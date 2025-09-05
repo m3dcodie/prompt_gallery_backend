@@ -69,11 +69,12 @@ export const createPromptService = async (
   promptCreateRequest: PromptRequest,
 ) => {
   const result = await pool.query(
-    "INSERT INTO prompts (user_id,title, content) VALUES ($1, $2, $3) RETURNING *",
+    "INSERT INTO prompts (user_id,title, content, model_id) VALUES ($1, $2, $3, $4) RETURNING *",
     [
       promptCreateRequest.user_id,
       promptCreateRequest.title,
       promptCreateRequest.content,
+      promptCreateRequest.model,
     ],
   );
   return result.rows[0];

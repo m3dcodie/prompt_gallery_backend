@@ -67,17 +67,22 @@ export const createPrompt = async (
       .then(async (data) => {
         console.log("data>>>");
         console.log(data);
+        // Defensive checks for output_text
+        if (!data.output_text || typeof data.output_text.content !== "string") {
+          return next(new Error("Invalid response from external API"));
+        }
+        
         const newPrompt = await createPromptService(promptCreateRequest);
-        // Ensure temperature is a decimal with precision 2, scale 2, and < 1
+        // Ensure temperature and top_p are decimals < 1 with precision 2
         let temperature = Math.min(
           0.99,
-          Math.max(0, Number.parseFloat(1)),//data.output_text.temperature
+          Math.max(0, Number.parseFloat(data.output_text.temperature ?? "0"))
         );
         temperature = Number(temperature.toFixed(2));
 
         let top_p = Math.min(
           0.99,
-          Math.max(0, Number.parseFloat(0.5)),//data.output_text.top_p
+          Math.max(0, Number.parseFloat(data.output_text.top_p ?? "0"))
         );
         top_p = Number(top_p.toFixed(2));
 
@@ -87,7 +92,7 @@ export const createPrompt = async (
           content: data.output_text.content,
           temperature: temperature,
           top_p: top_p,
-          usage: "100", //data.usage
+          usage: JSON.stringify(data.output_text.usage)
         });
 
         const randomResponse: responseType = {

@@ -67,7 +67,7 @@ const createResponseTableQuery = async () => {
       CREATE TABLE  IF NOT EXISTS responses (
         response_id SERIAL PRIMARY KEY,
         prompt_id INT REFERENCES prompts(prompt_id),
-        model_id INT REFERENCES LLM_Models(model_id),
+       
         top_p DECIMAL(2, 2),
         temperature DECIMAL(2, 2),
         content TEXT NOT NULL,
@@ -95,7 +95,7 @@ const updateResponseTableQuery = async () => {
     console.error("Error updating Response table:", error);
   }
 }
-*/
+
 const updateResponseTableQuery = async () => {
   try {
     const ResponseTableQuery = `
@@ -107,6 +107,20 @@ const updateResponseTableQuery = async () => {
     console.log("Table ResponseTableQuery updated successfully");
   } catch (error) {
     console.error("Error updating Response table:", error);
+  }
+}
+*/
+const updatePromptTableQuery = async () => {
+  try {
+    const PromptTableQuery = `
+      ALTER TABLE prompts         
+        ADD COLUMN  model_id INT REFERENCES LLM_Models(model_id)        
+      ;
+    `;
+    await pool.query(PromptTableQuery);
+    console.log("Table PromptTableQuery updated successfully");
+  } catch (error) {
+    console.error("Error updating PromptTableQuery table:", error);
   }
 }
 
@@ -199,5 +213,6 @@ export const createTables = async () => {
   await createShareTableQuery();
   await createCommentTableQuery();
   await createIndexQuery();
-  await updateResponseTableQuery();
+  //await updatePromptTableQuery();
+  //await updateResponseTableQuery();
 };
