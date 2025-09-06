@@ -25,6 +25,10 @@ Prompt Gallery Backend is the server-side application for the Prompt Gallery pla
   - Middlewares: Error handling, validation, authentication
   - Types: TypeScript interfaces and types for strong typing
 
+## API Call
+
+![UI](prompt-gallery-api.png)
+
 ## Project Structure
 
 ```
